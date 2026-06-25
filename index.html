@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍕 Que comida você seria no trabalho?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #FFF8F5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+      color: #1a1a1a;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .hero-emoji { font-size: 56px; display: block; margin-bottom: 1rem; }
+    .hero h1 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+    }
+    .hero p {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.07);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 560px;
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+
+    .progress-wrap { margin-bottom: 2rem; }
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .progress-label { font-size: 13px; color: #999; }
+    .progress-dots { display: flex; gap: 5px; }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #eee; transition: background 0.3s;
+    }
+    .dot.done { background: #D85A30; }
+    .progress-bar {
+      height: 5px; background: #f0ece9; border-radius: 99px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: linear-gradient(90deg, #D85A30, #F0997B);
+      border-radius: 99px; transition: width 0.4s ease;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 1.5px solid #eee;
+      background: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      color: #333;
+      text-align: left;
+      line-height: 1.5;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      font-family: 'Inter', sans-serif;
+    }
+    .option-btn:hover { border-color: #D85A30; background: #FFF8F5; }
+    .option-btn:active { transform: scale(0.99); }
+    .option-btn.selected {
+      border-color: #D85A30;
+      background: #FFF0EB;
+      color: #712B13;
+    }
+    .option-letter {
+      font-weight: 600;
+      color: #ccc;
+      font-size: 13px;
+      min-width: 22px;
+      height: 22px;
+      line-height: 22px;
+      text-align: center;
+      border-radius: 6px;
+      background: #f5f5f5;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .option-btn.selected .option-letter { background: #D85A30; color: #fff; }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      gap: 12px;
+    }
+    .btn-back {
+      padding: 11px 22px; border-radius: 12px;
+      border: 1.5px solid #eee; background: transparent;
+      cursor: pointer; font-size: 14px; color: #999;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-back:hover:not(:disabled) { border-color: #ccc; color: #555; }
+    .btn-back:disabled { opacity: 0.3; cursor: default; }
+    .btn-next {
+      padding: 13px 28px; border-radius: 12px;
+      border: none; background: #D85A30; color: #fff;
+      cursor: pointer; font-size: 15px; font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s, transform 0.1s, opacity 0.2s;
+      flex: 1; max-width: 220px;
+    }
+    .btn-next:hover:not(:disabled) { background: #993C1D; }
+    .btn-next:active:not(:disabled) { transform: scale(0.98); }
+    .btn-next:disabled { opacity: 0.3; cursor: default; }
+
+    /* Result */
+    .result-wrap { text-align: center; animation: fadeUp 0.4s ease both; }
+    .result-emoji-big { font-size: 80px; display: block; margin-bottom: 0.5rem; }
+    .result-badge {
+      display: inline-block;
+      font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+      padding: 5px 16px; border-radius: 99px;
+      background: #FFF0EB; color: #993C1D;
+      margin-bottom: 1rem; text-transform: uppercase;
+    }
+    .result-name {
+      font-size: 30px; font-weight: 700;
+      color: #1a1a1a; margin-bottom: 1rem;
+    }
+    .result-desc {
+      font-size: 16px; color: #555; line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .scores-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 2rem;
+    }
+    .score-item {
+      background: #f9f9f9; border-radius: 12px; padding: 10px 8px;
+      font-size: 13px; color: #888; text-align: center; line-height: 1.5;
+    }
+    .score-item.winner {
+      background: #FFF0EB; color: #712B13; font-weight: 500;
+    }
+    .score-item .s-emoji { font-size: 20px; display: block; margin-bottom: 2px; }
+    .score-item .s-pts { font-size: 11px; }
+    .btn-restart {
+      padding: 13px 32px; border-radius: 12px;
+      border: 1.5px solid #eee; background: transparent;
+      cursor: pointer; font-size: 15px; color: #555;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-restart:hover { border-color: #D85A30; color: #D85A30; background: #FFF8F5; }
+
+    .footer {
+      margin-top: 2.5rem;
+      font-size: 13px;
+      color: #bbb;
+      text-align: center;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 1.75rem 1.25rem; }
+      .scores-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <span class="hero-emoji">🍕🍣🍫</span>
+    <h1>Que comida você seria no trabalho?</h1>
+    <p>Responda 5 perguntas e descubra qual comida representa sua personalidade profissional.</p>
+  </div>
+
+  <div class="card">
+    <div id="quiz-screen">
+      <div class="progress-wrap">
+        <div class="progress-top">
+          <span class="progress-label" id="q-label">Pergunta 1 de 5</span>
+          <div class="progress-dots" id="dots"></div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="prog" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options" id="q-options"></div>
+      <div class="nav-row">
+        <button class="btn-back" id="btn-back" onclick="goBack()">← Voltar</button>
+        <button class="btn-next" id="btn-next" onclick="goNext()">Próxima →</button>
+      </div>
+    </div>
+
+    <div id="result-screen" style="display:none"></div>
+  </div>
+
+  <div class="footer">Feito com 💛 &nbsp;·&nbsp; Compartilhe com o time!</div>
+
+  <script>
+    const LETTERS = ['A','B','C','D','E','F'];
+
+    const questions = [
+      {
+        text: "Quando chega uma demanda urgente, você...",
+        options: [
+          "Já organizo tudo e faço um plano.",
+          "Chamo quem precisar e resolvemos juntos.",
+          "Vou com calma, mas entrego.",
+          "Penso em todas as possibilidades antes de agir.",
+          "Resolvo o mais rápido possível.",
+          "Tento deixar o clima leve enquanto resolvemos."
+        ]
+      },
+      {
+        text: "Seus colegas dizem que você é...",
+        options: [
+          "Muito organizado(a).",
+          "A pessoa que une todo mundo.",
+          "Muito querido(a).",
+          "Profundo(a) e estratégico(a).",
+          "Objetivo(a).",
+          "Engraçado(a) e alto-astral."
+        ]
+      },
+      {
+        text: "Em um projeto em equipe, você costuma...",
+        options: [
+          "Organizar as tarefas.",
+          "Incentivar e conectar as pessoas.",
+          "Ajudar quem precisar.",
+          "Pensar na melhor estratégia.",
+          "Colocar a mão na massa.",
+          "Animar o grupo."
+        ]
+      },
+      {
+        text: "Seu lema é...",
+        options: [
+          "Organização é tudo.",
+          "Juntos chegamos mais longe.",
+          "Gentileza nunca é demais.",
+          "Sempre existe uma solução melhor.",
+          "Feito é melhor que perfeito.",
+          "Trabalhar também pode ser divertido."
+        ]
+      },
+      {
+        text: "No happy hour você é quem...",
+        options: [
+          "Escolhe o lugar e faz a reserva.",
+          "Chama todo mundo.",
+          "Conversa com todas as pessoas.",
+          "Fica horas em um papo interessante.",
+          "Só quer comer e relaxar.",
+          "Faz todo mundo rir."
+        ]
+      }
+    ];
+
+    const scoring = [
+      ["sushi","pizza","lasanha","brigadeiro","hamburguer","pipoca"],
+      ["pizza","hamburguer","sushi","pipoca","lasanha","brigadeiro"],
+      ["brigadeiro","lasanha","pizza","hamburguer","pipoca","sushi"],
+      ["hamburguer","pipoca","lasanha","brigadeiro","sushi","pizza"],
+      ["pipoca","brigadeiro","hamburguer","sushi","pizza","lasanha"]
+    ];
+
+    const results = {
+      pizza:      { name: "Pizza",      emoji: "🍕", badge: "A alma do time",       desc: "Você é quem une todo mundo. Gosta de trabalhar em equipe, conectar pessoas e criar um ambiente acolhedor. Todo projeto fica melhor com você por perto." },
+      sushi:      { name: "Sushi",      emoji: "🍣", badge: "Mestre do planejamento", desc: "Você é organizado(a), disciplinado(a) e atento(a) aos detalhes. Planejamento faz parte do seu DNA e os resultados aparecem." },
+      brigadeiro: { name: "Brigadeiro", emoji: "🍫", badge: "Coração do escritório",  desc: "Você é querido(a), prestativo(a) e sempre disposto(a) a ajudar. Sua simpatia faz a diferença no dia a dia de todo mundo." },
+      lasanha:    { name: "Lasanha",    emoji: "🍝", badge: "Mente estratégica",      desc: "Você é estratégico(a), analítico(a) e costuma enxergar soluções que passam despercebidas pelos outros. Profundidade é seu diferencial." },
+      hamburguer: { name: "Hambúrguer", emoji: "🍔", badge: "Mão na massa",           desc: "Você é prático(a), objetivo(a) e eficiente. Prefere simplificar e resolver — sem enrolação, com resultado." },
+      pipoca:     { name: "Pipoca",     emoji: "🍿", badge: "Alto-astral garantido",  desc: "Você leva leveza para o time. Sua energia e bom humor tornam qualquer ambiente mais divertido e leve." }
+    };
+
+    const foodOrder = ["pizza","sushi","brigadeiro","lasanha","hamburguer","pipoca"];
+
+    let answers = {};
+    let current = 0;
+
+    function render() {
+      const q = questions[current];
+      document.getElementById('q-label').textContent = `Pergunta ${current + 1} de ${questions.length}`;
+      document.getElementById('q-text').textContent = q.text;
+      document.getElementById('prog').style.width = ((current / questions.length) * 100) + '%';
+
+      const opts = document.getElementById('q-options');
+      opts.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn' + (answers[current] === i ? ' selected' : '');
+        btn.innerHTML = `<span class="option-letter">${LETTERS[i]}</span><span>${opt}</span>`;
+        btn.onclick = () => { answers[current] = i; render(); };
+        opts.appendChild(btn);
+      });
+
+      const dots = document.getElementById('dots');
+      dots.innerHTML = '';
+      questions.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot' + (answers[i] !== undefined ? ' done' : '');
+        dots.appendChild(d);
+      });
+
+      document.getElementById('btn-back').disabled = current === 0;
+      const isLast = current === questions.length - 1;
+      const btnNext = document.getElementById('btn-next');
+      btnNext.textContent = isLast ? 'Ver resultado ✓' : 'Próxima →';
+      btnNext.disabled = answers[current] === undefined;
+    }
+
+    function goNext() {
+      if (answers[current] === undefined) return;
+      if (current < questions.length - 1) { current++; render(); }
+      else showResult();
+    }
+
+    function goBack() {
+      if (current > 0) { current--; render(); }
+    }
+
+    function showResult() {
+      const counts = { pizza:0, sushi:0, brigadeiro:0, lasanha:0, hamburguer:0, pipoca:0 };
+      Object.entries(answers).forEach(([qi, ai]) => { counts[scoring[qi][ai]]++; });
+      const winner = Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
+      const r = results[winner];
+
+      document.getElementById('quiz-screen').style.display = 'none';
+      document.getElementById('prog').style.width = '100%';
+
+      const scoresHtml = foodOrder.map(k => {
+        const pts = counts[k];
+        const isW = k === winner;
+        return `<div class="score-item${isW?' winner':''}">
+          <span class="s-emoji">${results[k].emoji}</span>
+          <span>${results[k].name}</span>
+          <span class="s-pts">${pts} pt${pts !== 1 ? 's' : ''}</span>
+        </div>`;
+      }).join('');
+
+      const rs = document.getElementById('result-screen');
+      rs.style.display = 'block';
+      rs.innerHTML = `
+        <div class="result-wrap">
+          <span class="result-emoji-big">${r.emoji}</span>
+          <span class="result-badge">${r.badge}</span>
+          <div class="result-name">${r.name}</div>
+          <div class="result-desc">${r.desc}</div>
+              <button class="btn-restart" onclick="restart()">↺ Refazer o quiz</button>
+        </div>
+      `;
+    }
+
+    function restart() {
+      answers = {};
+      current = 0;
+      document.getElementById('result-screen').style.display = 'none';
+      document.getElementById('quiz-screen').style.display = 'block';
+      render();
+    }
+
+    render();
+  </script>
+
+</body>
+</html>

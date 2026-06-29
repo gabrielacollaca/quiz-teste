@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🦸 Qual super-herói mais combina com você?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F0F4FF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+      color: #1a1a1a;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    .hero-logo { width: 110px; height: 110px; object-fit: contain; display: block; margin: 0 auto 1rem; }
+    .hero h1 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+    }
+    .hero p {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.07);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 560px;
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+
+    .progress-wrap { margin-bottom: 2rem; }
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .progress-label { font-size: 13px; color: #999; }
+    .progress-dots { display: flex; gap: 5px; }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #eee; transition: background 0.3s;
+    }
+    .dot.done { background: #4B5FD4; }
+    .progress-bar {
+      height: 5px; background: #e8ecf8; border-radius: 99px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: linear-gradient(90deg, #4B5FD4, #7B8FFF);
+      border-radius: 99px; transition: width 0.4s ease;
+    }
+
+    .question-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 1.5px solid #eee;
+      background: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      color: #333;
+      text-align: left;
+      line-height: 1.5;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      font-family: 'Inter', sans-serif;
+    }
+    .option-btn:hover { border-color: #4B5FD4; background: #F4F6FF; }
+    .option-btn:active { transform: scale(0.99); }
+    .option-btn.selected {
+      border-color: #4B5FD4;
+      background: #EEF1FF;
+      color: #2A3899;
+    }
+    .option-letter {
+      font-weight: 600;
+      color: #ccc;
+      font-size: 13px;
+      min-width: 22px;
+      height: 22px;
+      line-height: 22px;
+      text-align: center;
+      border-radius: 6px;
+      background: #f5f5f5;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .option-btn.selected .option-letter { background: #4B5FD4; color: #fff; }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      gap: 12px;
+    }
+    .btn-back {
+      padding: 11px 22px; border-radius: 12px;
+      border: 1.5px solid #eee; background: transparent;
+      cursor: pointer; font-size: 14px; color: #999;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-back:hover:not(:disabled) { border-color: #ccc; color: #555; }
+    .btn-back:disabled { opacity: 0.3; cursor: default; }
+    .btn-next {
+      padding: 13px 28px; border-radius: 12px;
+      border: none; background: #4B5FD4; color: #fff;
+      cursor: pointer; font-size: 15px; font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s, transform 0.1s, opacity 0.2s;
+      flex: 1; max-width: 220px;
+    }
+    .btn-next:hover:not(:disabled) { background: #3547B8; }
+    .btn-next:active:not(:disabled) { transform: scale(0.98); }
+    .btn-next:disabled { opacity: 0.3; cursor: default; }
+
+    .result-wrap { text-align: center; animation: fadeUp 0.4s ease both; }
+    .result-emoji-big { font-size: 80px; display: block; margin-bottom: 0.5rem; }
+    .result-badge {
+      display: inline-block;
+      font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+      padding: 5px 16px; border-radius: 99px;
+      background: #EEF1FF; color: #2A3899;
+      margin-bottom: 1rem; text-transform: uppercase;
+    }
+    .result-name {
+      font-size: 30px; font-weight: 700;
+      color: #1a1a1a; margin-bottom: 1rem;
+    }
+    .result-desc {
+      font-size: 16px; color: #555; line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .btn-restart {
+      padding: 13px 32px; border-radius: 12px;
+      border: 1.5px solid #eee; background: transparent;
+      cursor: pointer; font-size: 15px; color: #555;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-restart:hover { border-color: #4B5FD4; color: #4B5FD4; background: #F4F6FF; }
+
+    .footer {
+      margin-top: 2.5rem;
+      font-size: 13px;
+      color: #bbb;
+      text-align: center;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 1.75rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <img class="hero-logo" src="logo.png" alt="Customer Heroes" />
+    <h1>Qual super-herói mais combina com você?</h1>
+    <p>Responda 6 perguntas e descubra qual herói representa sua personalidade.</p>
+  </div>
+
+  <div class="card">
+    <div id="quiz-screen">
+      <div class="progress-wrap">
+        <div class="progress-top">
+          <span class="progress-label" id="q-label">Pergunta 1 de 6</span>
+          <div class="progress-dots" id="dots"></div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="prog" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options" id="q-options"></div>
+      <div class="nav-row">
+        <button class="btn-back" id="btn-back" onclick="goBack()">← Voltar</button>
+        <button class="btn-next" id="btn-next" onclick="goNext()">Próxima →</button>
+      </div>
+    </div>
+
+    <div id="result-screen" style="display:none"></div>
+  </div>
+
+  <div class="footer">Feito com 💙 &nbsp;·&nbsp; Compartilhe com o time!</div>
+
+  <script>
+    const LETTERS = ['A','B','C','D'];
+
+    const questions = [
+      {
+        text: "Quando surge um problema inesperado, você costuma:",
+        options: [
+          "Assumir a liderança e organizar todos.",
+          "Pensar em um plano antes de agir.",
+          "Agir na hora, seguindo seus instintos.",
+          "Buscar uma solução criativa ou tecnológica."
+        ]
+      },
+      {
+        text: "Qual habilidade você gostaria de ter?",
+        options: [
+          "Super força.",
+          "Inteligência acima da média.",
+          "Velocidade.",
+          "Voar."
+        ]
+      },
+      {
+        text: "Em uma equipe, você é quem:",
+        options: [
+          "Motiva e inspira os outros.",
+          "Analisa os riscos e monta a estratégia.",
+          "Resolve as situações mais difíceis na prática.",
+          "Tem as ideias mais inovadoras."
+        ]
+      },
+      {
+        text: "O que mais te motiva?",
+        options: [
+          "Proteger as pessoas.",
+          "Resolver desafios complexos.",
+          "Superar seus próprios limites.",
+          "Descobrir coisas novas e evoluir."
+        ]
+      },
+      {
+        text: "Seu maior ponto forte é:",
+        options: [
+          "Coragem.",
+          "Inteligência.",
+          "Determinação.",
+          "Criatividade."
+        ]
+      },
+      {
+        text: "Se você pudesse escolher uma missão, qual seria?",
+        options: [
+          "Salvar uma cidade inteira.",
+          "Impedir um grande plano de um vilão usando estratégia.",
+          "Enfrentar o vilão mais poderoso do mundo.",
+          "Criar uma invenção que mudasse a vida das pessoas."
+        ]
+      }
+    ];
+
+    const results = {
+      a: { name: "Mulher Maravilha", emoji: "🛡️", badge: "Liderança nata", desc: "Você é uma liderança nata. Inspira confiança, coloca a equipe em primeiro lugar e enfrenta desafios com coragem e responsabilidade." },
+      b: { name: "Batman",           emoji: "🦇", badge: "Mestre da estratégia", desc: "Seu maior poder é a estratégia. Você prefere pensar antes de agir, planejar cada detalhe e encontrar soluções onde outros só veem problemas." },
+      c: { name: "Homem-Aranha",     emoji: "⚡", badge: "Determinado e veloz", desc: "Você é determinado, rápido para agir e encara desafios com leveza. Mesmo diante das dificuldades, não desiste de fazer a coisa certa." },
+      d: { name: "Homem de Ferro",   emoji: "🤖", badge: "Inovador por natureza", desc: "Criativo e inovador, você gosta de aprender, desenvolver soluções e transformar ideias em realidade. Seu diferencial é pensar fora da caixa." }
+    };
+
+    let answers = {};
+    let current = 0;
+
+    function render() {
+      const q = questions[current];
+      document.getElementById('q-label').textContent = `Pergunta ${current + 1} de ${questions.length}`;
+      document.getElementById('q-text').textContent = q.text;
+      document.getElementById('prog').style.width = ((current / questions.length) * 100) + '%';
+
+      const opts = document.getElementById('q-options');
+      opts.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn' + (answers[current] === i ? ' selected' : '');
+        btn.innerHTML = `<span class="option-letter">${LETTERS[i]}</span><span>${opt}</span>`;
+        btn.onclick = () => { answers[current] = i; render(); };
+        opts.appendChild(btn);
+      });
+
+      const dots = document.getElementById('dots');
+      dots.innerHTML = '';
+      questions.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot' + (answers[i] !== undefined ? ' done' : '');
+        dots.appendChild(d);
+      });
+
+      document.getElementById('btn-back').disabled = current === 0;
+      const isLast = current === questions.length - 1;
+      const btnNext = document.getElementById('btn-next');
+      btnNext.textContent = isLast ? 'Ver resultado ✓' : 'Próxima →';
+      btnNext.disabled = answers[current] === undefined;
+    }
+
+    function goNext() {
+      if (answers[current] === undefined) return;
+      if (current < questions.length - 1) { current++; render(); }
+      else showResult();
+    }
+
+    function goBack() {
+      if (current > 0) { current--; render(); }
+    }
+
+    function showResult() {
+      const keys = ['a','b','c','d'];
+      const counts = { a:0, b:0, c:0, d:0 };
+      Object.values(answers).forEach(i => { counts[keys[i]]++; });
+      const winner = Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0];
+      const r = results[winner];
+
+      document.getElementById('quiz-screen').style.display = 'none';
+
+      const rs = document.getElementById('result-screen');
+      rs.style.display = 'block';
+      rs.innerHTML = `
+        <div class="result-wrap">
+          <span class="result-emoji-big">${r.emoji}</span>
+          <span class="result-badge">${r.badge}</span>
+          <div class="result-name">${r.name}</div>
+          <div class="result-desc">${r.desc}</div>
+          <button class="btn-restart" onclick="restart()">↺ Refazer o quiz</button>
+        </div>
+      `;
+    }
+
+    function restart() {
+      answers = {};
+      current = 0;
+      document.getElementById('result-screen').style.display = 'none';
+      document.getElementById('quiz-screen').style.display = 'block';
+      render();
+    }
+
+    render();
+  </script>
+
+</body>
+</html>
